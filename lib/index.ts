@@ -1,3 +1,3 @@
 export * from './base32';
 export * from './totp';
-export * from './totp_key';
+export * from './otp_url';

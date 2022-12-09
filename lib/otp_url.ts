@@ -8,6 +8,7 @@ import { encodeBase32 } from './base32';
  */
 export function otpUrl({
   name,
+  issuer,
   secret,
 }: {
   /**
