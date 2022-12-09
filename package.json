@@ -26,7 +26,7 @@
     "dist"
   ],
   "scripts": {
-    "test": "vitest",
+    "test": "vitest run",
     "lint": "eslint . && tsc --noEmit",
     "doc": "typedoc --options typedoc.json",
     "prepare": "rollup -c rollup.config.mjs && npm run doc",
