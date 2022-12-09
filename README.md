@@ -1,4 +1,4 @@
-# micro-totp
+# @placemarkio/micro-totp
 
 ## 📁 [Docs](https://placemark.github.io/micro-totp/)
 
