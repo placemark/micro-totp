@@ -1,5 +1,5 @@
 import { decodeBase32 } from './base32';
-import { Buffer } from 'node:buffer';
+import { Buffer } from 'buffer';
 import type { Opaque } from 'type-fest';
 import { intToBytes } from './internal';
 import * as crypto from 'crypto';
