@@ -1,6 +1,6 @@
 {
   "name": "@placemarkio/micro-totp",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "a small, simple TOTP library",
   "main": "dist/micro-totp.cjs",
   "module": "dist/micro-otp.es.mjs",
