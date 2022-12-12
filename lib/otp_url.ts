@@ -37,7 +37,7 @@ export function otpUrl({
  * Client-side API: generate a key with
  * crypto.subtle, and return it as base32.
  */
-export async function getKey() {
+export async function getKeyBytes() {
   const key = await window.crypto.subtle.generateKey(
     {
       name: 'HMAC',
@@ -47,6 +47,13 @@ export async function getKey() {
     ['verify']
   );
   const arrayBuffer = await window.crypto.subtle.exportKey('raw', key);
-  const bytes = new Uint8Array(arrayBuffer.slice(0, 10));
-  return encodeBase32(bytes);
+  return new Uint8Array(arrayBuffer.slice(0, 10));
+}
+
+/**
+ * Client-side API: generate a key with
+ * crypto.subtle, and return it as base32.
+ */
+export async function getKey() {
+  return encodeBase32(await getKeyBytes());
 }
