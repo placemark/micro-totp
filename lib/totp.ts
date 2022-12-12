@@ -1,4 +1,3 @@
-import { decodeBase32 } from './base32';
 import { Buffer } from 'buffer';
 import type { Opaque } from 'type-fest';
 import { intToBytes } from './internal';
@@ -34,6 +33,21 @@ export type Counter = Opaque<number>;
  */
 const TIME_STEP_SECONDS = 30 as Seconds;
 
+export interface KeyAndTime {
+  /**
+   * Key for the one time password.  This should be unique and secret for
+   * every user as it is the seed used to calculate the HMAC
+   *
+   * Encoded as base32
+   */
+  keyBuffer: Uint8Array;
+
+  /**
+   * The current time, from Date.now();
+   */
+  timeMs: Milliseconds;
+}
+
 export function toUnixTime(timeMs: Milliseconds): Seconds {
   return (timeMs / 1000) as Seconds;
 }
@@ -62,27 +76,10 @@ const TIME_WINDOW = 3;
  *
  * @returns a six-character numerical string
  */
-export function generateTotp({
-  keyBase32,
-  timeMs,
-}: {
-  /*
-   * Key for the one time password.  This should be unique and secret for
-   * every user as it is the seed used to calculate the HMAC.
-   * This should be base32-encoded.
-   */
-  keyBase32: string;
-  /**
-   * The current time, in millseconds. Most likely sourced from
-   * Date.now()
-   */
-  timeMs: Milliseconds;
-}): string {
-  const counter = toCounter(toUnixTime(timeMs));
-
+export function generateTotp({ keyBuffer, timeMs }: KeyAndTime): string {
   return generateTotpInner({
-    keyBase32,
-    counter,
+    keyBuffer,
+    counter: toCounter(toUnixTime(timeMs)),
   });
 }
 
@@ -93,20 +90,17 @@ export function generateTotp({
  * @returns a six-character numerical string
  */
 function generateTotpInner({
-  keyBase32,
+  keyBuffer,
   counter,
 }: {
   /**
    * base32-encoded key
    */
-  keyBase32: string;
+  keyBuffer: Uint8Array;
   counter: Counter;
 }): string {
   // The counter, as bytes.
   const counterBuffer = Buffer.from(intToBytes(counter));
-
-  // The key, decoded from base32 into bytes.
-  const keyBuffer = decodeBase32(keyBase32);
 
   // Use keyBuffer as the secret for a sha1-based
   // HMAC
@@ -137,27 +131,14 @@ function generateTotpInner({
  */
 export function verifyTotp({
   token,
-  keyBase32,
+  keyBuffer,
   timeMs,
 }: {
   /**
    * Passcode to validate
    */
   token: string;
-
-  /**
-   * Key for the one time password.  This should be unique and secret for
-   * every user as it is the seed used to calculate the HMAC
-   *
-   * Encoded as base32
-   */
-  keyBase32: string;
-
-  /**
-   * The current time, from Date.now();
-   */
-  timeMs: Milliseconds;
-}): boolean {
+} & KeyAndTime): boolean {
   const counter = toCounter(toUnixTime(timeMs));
   const start = (counter - TIME_WINDOW) as Counter;
   const finish = (counter + TIME_WINDOW) as Counter;
@@ -166,7 +147,7 @@ export function verifyTotp({
   // a correct code
   for (let i = start; i <= finish; ++i) {
     const generatedToken = generateTotpInner({
-      keyBase32,
+      keyBuffer,
       counter: i,
     });
     if (generatedToken === token) {

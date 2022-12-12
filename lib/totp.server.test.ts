@@ -6,9 +6,11 @@ import {
   verifyTotp,
 } from './totp';
 import { test, expect } from 'vitest';
+import { decodeBase32 } from './base32';
 
-const keyBase32 = 'AQVHBSZPROHVJFLV';
+const keyBuffer = decodeBase32('AQVHBSZPROHVJFLV');
 const timeMs = 1666120723459 as Milliseconds;
+
 // 120 seconds
 const drift = (1 * 1000 * 120) as Milliseconds;
 
@@ -25,7 +27,7 @@ test('toUnixtime', () => {
 test('genTotp', () => {
   expect(
     generateTotp({
-      keyBase32: '0000',
+      keyBuffer: decodeBase32('0000'),
       timeMs: 1666111090825 as Milliseconds,
     })
   ).toEqual('846377');
@@ -33,7 +35,7 @@ test('genTotp', () => {
 
 test('verifyTotp', () => {
   const token = generateTotp({
-    keyBase32,
+    keyBuffer,
     timeMs,
   });
 
@@ -42,7 +44,7 @@ test('verifyTotp', () => {
   expect(
     verifyTotp({
       token,
-      keyBase32,
+      keyBuffer,
       timeMs,
     })
   ).toBeTruthy();
@@ -50,7 +52,7 @@ test('verifyTotp', () => {
   expect(
     verifyTotp({
       token,
-      keyBase32,
+      keyBuffer,
       timeMs: (timeMs - 10) as Milliseconds,
     })
   ).toBeTruthy();
@@ -58,7 +60,7 @@ test('verifyTotp', () => {
   expect(
     verifyTotp({
       token,
-      keyBase32,
+      keyBuffer,
       timeMs: (timeMs - drift) as Milliseconds,
     })
   ).toBeFalsy();
